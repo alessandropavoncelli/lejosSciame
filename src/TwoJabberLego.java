@@ -1,5 +1,3 @@
-
-
 //A server that uses multithreading to handle 
 //any number of clients.
 import java.io.*;
@@ -19,12 +17,9 @@ class TwoJabberLego extends Thread {
 	private static BufferedReader in;
 	private static PrintWriter out;
 	private  RCXMotor a,b,c;
-	private Comandi ferma;
-	TwoJabberLego(Socket s, Comandi ferma) throws IOException {
-		//this.a=a;
-		//this.b=b;
-		//this.c=c;
-		this.ferma = ferma;
+	private Comandi comando;
+	TwoJabberLego(Socket s, Comandi comando) throws IOException {
+		this.comando = comando;
 		conn = s;
 		in = 
 				new BufferedReader(
@@ -36,10 +31,7 @@ class TwoJabberLego extends Thread {
 						new BufferedWriter(
 								new OutputStreamWriter(
 										conn.getOutputStream())), true);
-		// If any of the above calls throw an 
-		// exception, the caller is responsible for
-		// closing the socket. Otherwise the thread
-		// will close it.
+		
 		start(); // Calls run()
 	}
 	public void run() {
@@ -52,6 +44,7 @@ class TwoJabberLego extends Thread {
 				e2.printStackTrace();
 			}
 			LCD.drawString("attendo comandi", 0, 4);
+			this.comando.setNuovoComando(false);
 			while(true) {
 				try {
 					messaggio = in.readLine();
@@ -63,12 +56,37 @@ class TwoJabberLego extends Thread {
 					e.printStackTrace();
 				}
 				LCD.drawString("aaaaaaaaaaaaaaaaaaaaaa",0,4);
+				if(messaggio.equals("stop")) {
+					LCD.drawString("mi fermo     ",0,6);
+					this.comando.setNuovoComando(true);
+					this.comando.setFerma(1);
+				}
+				if(messaggio.equals("sx")) {
+					LCD.drawString("giro a sx  ",0,6);
+					this.comando.setNuovoComando(true);
+					this.comando.setDirezione('s');	
+				}
+				if(messaggio.equals("dx")) {
+					LCD.drawString("giro a dx  ",0,6);
+					this.comando.setNuovoComando(true);
+					this.comando.setDirezione('d');	
+				}
+				if(messaggio.equals("vai")) {
+					LCD.drawString("vado       ",0,6);
+					this.comando.setNuovoComando(true);
+					this.comando.setFerma(0);	
+					this.comando.setDirezione('a');	
+				}
 				if(messaggio.equals("end")) {
-					LCD.drawString("sto per stoppare",0,6);
-					this.ferma.setFerma(1);
-					break;
+					LCD.drawString("fine       ",0,6);
+					this.comando.setNuovoComando(true);
+					this.comando.setFerma(1);
+					this.comando.setInterrompi(true);
+					
 				}
 			}
 	}
 	
 }
+
+

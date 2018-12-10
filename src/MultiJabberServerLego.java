@@ -5,6 +5,7 @@
  */
 
 import java.io.IOException;
+
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -16,11 +17,13 @@ import lejos.hardware.sensor.EV3TouchSensor;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.robotics.SampleProvider;
 import lejos.utility.Delay;
+
 public class MultiJabberServerLego {  
-  static final int PORT = 9898;
-  
+  static final int PORT = 9898; 
+  static final int PORTCOMMAND = 9899; 
   public static void main(String[] args) throws IOException {
     ServerSocket s = new ServerSocket(PORT);
+    ServerSocket sc = new ServerSocket(PORTCOMMAND);
     //System.out.println("Server Started");
     Comandi comandi=new Comandi();
     comandi.setFerma(0);
@@ -37,7 +40,7 @@ public class MultiJabberServerLego {
         		socket.close();
         }
         // altro socket per il secondo Thread...questo thread riceve comandi dal PC
-        Socket so = s.accept();
+        Socket so = sc.accept();
 	    try {
 	            new TwoJabberLego(so,comandi);
 	    } catch(IOException e) {

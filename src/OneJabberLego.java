@@ -1,4 +1,3 @@
-
 // A server that uses multithreading to handle 
 // any number of clients.
 import java.io.*;
@@ -30,7 +29,8 @@ class OneJabberLego extends Thread {
     out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(conn.getOutputStream())), true);
     start(); // Calls run()
   }
-  public void run() {
+  @SuppressWarnings("deprecation")
+public void run() {
 	  	int tempo = 0;
 	  	String messaggio=new String();
 		String response="";
@@ -52,6 +52,9 @@ class OneJabberLego extends Thread {
 	    try {
 	    	    LCD.drawString("PROGRAMMA INIZIATO", 0, 4);
 				//p=new PrintWriter(conn.getOutputStream());
+	    	    this.comando.setInterrompi(false);
+	    	    this.comando.setFerma(0);
+	    	    vai();
 				do {
 					
 					// leggo dal sensore di tocco ( terminazione)
@@ -60,8 +63,7 @@ class OneJabberLego extends Thread {
 					// leggo dal sonar
 					sonar.fetchSample(value, 0);
 					// costruisco output
-					for(int i=0;i<distanceMode.sampleSize();i++) 
-					{
+					for(int i=0;i<distanceMode.sampleSize();i++) {
 						response=response+new Float(value[i]).toString()+"-";;	
 					}
 					//LCD.drawString("xxxxxxFINO QUI 3", 0, 4);
@@ -69,39 +71,49 @@ class OneJabberLego extends Thread {
 					response="";
 					//p.flush();
 					// se si avvicina a qualcosa cambia altrimenti va dritto
-					if(value[0]<0.5) {
+					if(value[0]<0.1) {
 						//stop();
-						if (direzione=='s')
-							giraSx();
-						else
-							giraDx();
-						numGiri++;
-						//tempo di curvatura, per tutto questo tempo rimane attivo il comando
-						Delay.msDelay(100);
-						// dopo un po'se retrocede
-						if (numGiri  > numGiriDirezione) 
-						{
-							retrocedi();
-							Delay.msDelay(1000);
-							numGiri=0;
+						if(this.comando.getFerma()!=1) {
+							if (direzione=='s')
+								giraSx();
+							else
+								giraDx();
+							numGiri++;
+							//tempo di curvatura, per tutto questo tempo rimane attivo il comando
+							Delay.msDelay(100);
+							// dopo un po'se retrocede
+							if (numGiri  > numGiriDirezione) {
+								retrocedi();
+								Delay.msDelay(2000);
+								numGiri=0;
+							}
 						}
-						//stop();
+						else
+							stoppati();
 					}
 					// nel caso non veda oggetti 
 					else {
-						//LCD.drawString("---FINO QUI 2", 0, 4);
-						vai();
-						//sett ala direzione a muzzo per la prossima occasione di prossimitá con un oggetto ( if) 
+						if(this.comando.getFerma()==0)
+							vai();
+						else	
+							stoppati();
+						//setta la direzione a muzzo per la prossima occasione di prossimitá con un oggetto ( if) 
 						if(Math.random() > 0.5)
 							direzione = 's';
 						else
 							direzione = 'd';
 						numGiri=0;
 					}
+					//se ricevuto un comando..
+					if(comando.isNuovoComando()){
+						direzione = this.comando.getDirezione();
+						this.comando.setNuovoComando(false);;
+					}
 					Delay.msDelay(30);	
 					//LCD.drawString("hhhhhhhhhhhhhhhhhhhhhhh", 0, 4);
 					// si ferma quando tocca
-				}while((sampletouch[0]==0)&&(this.comando.getFerma()==0));	
+				}while((sampletouch[0]==0)&&(this.comando.isInterrompi()==false));	
+				
 			
 		} catch (Exception e) {
 			p.close();
@@ -128,8 +140,8 @@ class OneJabberLego extends Thread {
 
 static void  vai() {
 	
-	c.setPower(100);
-	b.setPower(100);
+	c.setPower(50);
+	b.setPower(50);
 	
 }
 static void  stoppati() {
@@ -140,17 +152,22 @@ static void  stoppati() {
 
 static void  giraDx() {
 
-	b.setPower(80);
+	b.setPower(30);
 	c.setPower(0);
 }
 static void  giraSx() {
 	
 	b.setPower(0);
-	c.setPower(80);
+	c.setPower(30);
 }
 static void  retrocedi() {
 	
-	b.setPower(-80);
-	c.setPower(-80);
+	b.setPower(-50);
+	c.setPower(-50);
 }
 }
+
+
+
+
+

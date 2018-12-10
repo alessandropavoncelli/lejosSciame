@@ -1,10 +1,26 @@
-// oggetto condiviso che contiene i comandi
-
 public class Comandi {
 	private int ferma=0;
 	private char direzione;
 	private int centrale;
+	private boolean nuovoComando=false;
+	private boolean interrompi=false;
 	
+	public boolean isInterrompi() {
+		return interrompi;
+	}
+
+	public void setInterrompi(boolean interrompi) {
+		this.interrompi = interrompi;
+	}
+
+	public boolean isNuovoComando() {
+		return nuovoComando;
+	}
+
+	public void setNuovoComando(boolean nuovoComando) {
+		this.nuovoComando = nuovoComando;
+	}
+
 	public int getCentrale() {
 		return centrale;
 	}

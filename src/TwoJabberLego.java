@@ -82,6 +82,8 @@ class TwoJabberLego extends Thread {
 					this.comando.setNuovoComando(true);
 					this.comando.setFerma(1);
 					this.comando.setInterrompi(true);
+					break;
+					
 					
 				}
 			}

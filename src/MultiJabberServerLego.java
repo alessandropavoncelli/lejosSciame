@@ -21,21 +21,27 @@ import lejos.utility.Delay;
 public class MultiJabberServerLego {  
   static final int PORT = 9898; 
   static final int PORTCOMMAND = 9899; 
+  
   public static void main(String[] args) throws IOException {
     ServerSocket s = new ServerSocket(PORT);
     ServerSocket sc = new ServerSocket(PORTCOMMAND);
+    Ev3MobileRobot robot;
     //System.out.println("Server Started");
     Comandi comandi=new Comandi();
     comandi.setFerma(0);
     try {
       //while(true) {
         // Blocks until a connection occurs:
+    	LCD.drawString("istanzio robot", 0, 4);
+    	robot = new Ev3MobileRobot();
+    	//robot.setPowerMotorForward(50);
+    	//robot.goForward();
     	LCD.drawString("Pronto per la connessione", 0, 4);
     	// primo socket da dare al Thread OneJabberLego...questo thread sviluppa il cammino del robot e invia il feedback al PC
         Socket socket = s.accept();
         LCD.drawString("CONNESSO!", 0, 4);
         try {
-        		new OneJabberLego(socket,comandi);
+        		new OneJabberLego(socket,comandi,robot);
         } catch(IOException e) {
         		socket.close();
         }

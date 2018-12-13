@@ -1,5 +1,6 @@
 // A server that uses multithreading to handle 
 // any number of clients.
+/*
 import java.io.*;
 import java.net.*;
 
@@ -165,6 +166,106 @@ static void  retrocedi() {
 	b.setPower(-50);
 	c.setPower(-50);
 }
+}
+*/
+// nuova versione che usa ev3Robot ecc
+// A server that uses multithreading to handle 
+// any number of clients.
+
+import java.io.*;
+import java.net.*;
+
+import lejos.hardware.lcd.LCD;
+import lejos.hardware.motor.RCXMotor;
+import lejos.hardware.port.MotorPort;
+import lejos.hardware.port.SensorPort;
+import lejos.hardware.sensor.EV3TouchSensor;
+import lejos.hardware.sensor.EV3UltrasonicSensor;
+import lejos.robotics.SampleProvider;
+import lejos.utility.Delay;
+
+class OneJabberLego extends Thread {
+  private Socket conn;
+  private static BufferedReader in;
+  private static PrintWriter out;
+  private Comandi comando ;
+  private Ev3MobileRobot robotMobile;
+  public OneJabberLego(Socket s, Comandi ferma,Ev3MobileRobot robotMobile) throws IOException {
+	this.robotMobile = robotMobile;
+	this.comando = ferma;
+	this.comando.setFerma(0);
+    conn = s;
+    in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+    out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(conn.getOutputStream())), true);
+    start(); // Calls run()
+  }
+  @SuppressWarnings("deprecation")
+  public void run() {
+	  	int tempo = 0;
+	  	String messaggio=new String();
+		String response="";
+		PrintWriter p=null;
+		char direzione ='s';
+		//LCD.drawString("in attesa di start", 0, 4);
+		
+	    try {
+	    	    LCD.drawString("PROGRAMMA INIZIATO", 0, 4);
+	    	    this.comando.setInterrompi(false);
+	    	    this.comando.setFerma(0);
+	    	    this.robotMobile.setPowerMotorForward(40);
+	    	    this.robotMobile.goForward();
+	  
+				do 
+				{
+					if(this.comando.isNuovoComando()) {
+						if(this.comando.getDirezione()=='d') {
+							this.robotMobile.turnRight(30, 20);
+							this.comando.setNuovoComando(false);
+						}
+						if(this.comando.getDirezione()=='s') {
+							this.robotMobile.turnLeft(30, 20);
+							this.comando.setNuovoComando(false);
+						}
+						if(this.comando.getDirezione()=='s') {
+							this.robotMobile.turnLeft(2000, 30);
+							this.comando.setNuovoComando(false);
+						}
+						if(this.comando.getDirezione()=='i') {
+							this.robotMobile.backward(30);
+							this.comando.setNuovoComando(false);
+						}
+						if(this.comando.getFerma()==1) {
+							this.robotMobile.stop();
+							this.comando.setNuovoComando(false);
+						}
+						
+					}
+					
+					// invia i dati al client
+					//out.printf("%d\n", this.robotMobile.getGyroSensor().getAngle());	
+				}
+				while(!this.robotMobile.seTouch()&&(!this.comando.isInterrompi()));
+		} catch (Exception e) {
+			p.close();
+			try {
+					conn.close();
+					//socket.close();
+			} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					LCD.drawString("ERROR!!!", 0, 4);
+					e1.printStackTrace();
+			}
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	
+		this.robotMobile.getTouchSensor().close();
+		this.robotMobile.stop();
+		////toccoSensor.close();
+		LCD.drawString("ciao", 0, 4);
+		//Delay.msDelay(10000);
+		/////
+	  }
 }
 
 
